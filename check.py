@@ -26,6 +26,7 @@ valid_dataset = ImageSegmentationDataset(
 encoded_inputs = train_dataset[0]
 print(encoded_inputs["pixel_values"].shape)
 
+from torch import nn
 from torch.utils.data import DataLoader
 
 train_dataloader = DataLoader(train_dataset, batch_size=4, shuffle=True)
@@ -54,7 +55,7 @@ model = SegformerForSemanticSegmentation.from_pretrained(
 )
 import torch
 from sklearn.metrics import accuracy_score
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 from transformers import AdamW
 
 optimizer = AdamW(model.parameters(), lr=0.00006)
