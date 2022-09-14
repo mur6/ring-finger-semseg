@@ -7,4 +7,8 @@ $ source .venv/bin/activate.fish
 (.venv) $ pip install -r requirements/dev.txt
 ```
 
-## Run
+## 教師データの生成
+```
+python generate_data.py \
+  --background_image_path=../coco2017/train/data
+```
