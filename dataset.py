@@ -1,69 +1,54 @@
-import os
+# import os
 
 import albumentations as aug
 import cv2
 import numpy as np
-import pandas as pd
 
 # from transformers import AdamW
 import torch
 from PIL import Image
-from sklearn.metrics import accuracy_score
-from torch import nn
-from torch.utils.data import DataLoader, Dataset
 
-# from torch.utils.tensorboard import SummaryWriter
+# from sklearn.metrics import accuracy_score
+# from torch import nn
+from torch.utils.data import Dataset
+from torchvision.transforms import ToTensor
 
-# from tqdm.notebook import tqdm
-
-# from transformers import MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation
-# from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
+# import pandas as pd
 
 
 class ImageSegmentationDataset(Dataset):
     """Image segmentation dataset."""
 
     def __init__(self, root_dir, feature_extractor, transforms=None, train=True):
-        """
-        Args:
-            root_dir (string): Root directory of the dataset containing the images + annotations.
-            feature_extractor (SegFormerFeatureExtractor): feature extractor to prepare images + segmentation maps.
-            train (bool): Whether to load "training" or "validation" images + annotations.
-        """
         self.root_dir = root_dir
         self.feature_extractor = feature_extractor
         self.train = train
+
+        self.img_path = self.root_dir / "images"
+        self.mask_path = self.root_dir / "masks"
         self.transforms = transforms
 
-        sub_path = "train" if self.train else "test"
-        self.img_dir = os.path.join(self.root_dir, sub_path, "train_images")
-        self.ann_dir = os.path.join(self.root_dir, sub_path, "train_masks")
-
         # read images
-        image_file_names = []
-        for root, dirs, files in os.walk(self.img_dir):
-            image_file_names.extend(files)
-        self.images = sorted(image_file_names)
-
+        image_path_iter = self.img_path.glob("*.jpg")
+        self.images = sorted(image_path_iter, key=lambda p: p.name)
         # read annotations
-        annotation_file_names = []
-        for root, dirs, files in os.walk(self.ann_dir):
-            annotation_file_names.extend(files)
-        self.annotations = sorted(annotation_file_names)
+        mask_path_iter = self.mask_path.glob("*.png")
+        # for root, dirs, files in os.walk(self.ann_dir):
+        self.masks = sorted(mask_path_iter, key=lambda p: p.name)
         print(f"images count: {len(self.images)}")
-        print(f"masks count: {len(self.annotations)}")
-        assert len(self.images) == len(self.annotations), "There must be as many images as there are segmentation maps"
+        print(f"masks count: {len(self.masks)}")
+        assert len(self.images) == len(self.masks), "There must be as many images as there are segmentation maps"
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
-        image = cv2.imread(os.path.join(self.img_dir, self.images[idx]))
+        image = cv2.imread(str(self.images[idx]))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        segmentation_map = cv2.imread(str(self.masks[idx]), cv2.IMREAD_GRAYSCALE)
 
-        segmentation_map = cv2.imread(os.path.join(self.ann_dir, self.annotations[idx]))
-        segmentation_map = cv2.cvtColor(segmentation_map, cv2.COLOR_BGR2GRAY)
-
+        # segmentation_map = cv2.imread(os.path.join(self.ann_dir, self.annotations[idx]))
+        # segmentation_map = cv2.cvtColor(segmentation_map, cv2.COLOR_BGR2GRAY)
         #         image = Image.open()
         #         segmentation_map = Image.open()
 
