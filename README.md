@@ -12,3 +12,13 @@ $ source .venv/bin/activate.fish
 python generate_data.py \
   --background_image_path=../coco2017/train/data
 ```
+
+## 推論
+```
+python inf_segformer.py  models/segformer/ logits_mit_b1.pt
+```
+
+## Visualize
+```
+PYTHONPATH=. python scripts/visualize.py outputs/logits_mit_b4.pt [OUTPUT_PNG_FILENAME]
+```
