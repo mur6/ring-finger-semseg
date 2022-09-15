@@ -22,7 +22,9 @@ noise_t = A.Compose(
         ),
         A.GaussNoise(),
         A.Blur(blur_limit=3),
-        A.RandomBrightness(limit=0.4)
+        A.RandomBrightness(limit=0.4),
+        A.RandomScale(0.25),
+        A.Rotate(border_mode=cv2.BORDER_CONSTANT),
         # A.OpticalDistortion(),
         # A.GridDistortion(),
     ]
@@ -96,7 +98,7 @@ def iter_image_and_segmentation_map(root_dir):
 
 def generate_and_save_images(blender_image_path, *, output_image_dir, output_mask_dir, background_image_iter):
     it = iter_image_and_segmentation_map(blender_image_path)
-    it = list(it)[:5]
+    # it = list(it)[:5]
     for idx, (image, segmentation_map) in enumerate(it):
         image = composite_image(fg=image, bg=next(background_image_iter), segmentation_map=segmentation_map)
         # print("composite type:", image.dtype)
@@ -112,7 +114,7 @@ def generate_and_save_images(blender_image_path, *, output_image_dir, output_mas
 
 def main(args):
     background_image_iter = iter_background_images(args.background_image_path)
-    sub_dir = "training"
+    sub_dir = args.target
     output_dir = args.output_base_path / sub_dir
     output_dir.mkdir(exist_ok=True)
     (output_dir / "images").mkdir(exist_ok=True)
@@ -133,6 +135,7 @@ if __name__ == "__main__":
     parser.add_argument("--background_image_path", type=Path, default="/content/data")
     parser.add_argument("--blender_image_base_path", type=Path, required=True)
     parser.add_argument("--output_base_path", type=Path, default="data/outputs")
+    parser.add_argument("--target", default="training")
 
     args = parser.parse_args()
     main(args)
