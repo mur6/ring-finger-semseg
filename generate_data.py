@@ -94,17 +94,20 @@ def iter_image_and_segmentation_map(root_dir):
         yield image, segmentation_map
 
 
-def generate_and_save_images(output_dir, blender_image_path, *, background_image_iter):
+def generate_and_save_images(blender_image_path, *, output_image_dir, output_mask_dir, background_image_iter):
     it = iter_image_and_segmentation_map(blender_image_path)
+    it = list(it)[:5]
     for idx, (image, segmentation_map) in enumerate(it):
         image = composite_image(fg=image, bg=next(background_image_iter), segmentation_map=segmentation_map)
-        print("composite type:", image.dtype)
-        image = noise_t(image=image)["image"]
-        print(type(image), image.shape)
-        # plt.imshow(image)
-        # plt.show()
-        # Image.fromarray(image, "RGB").save(p)
-        cv2.imwrite(str(output_dir / f"image_{idx:06}.jpg"), image[..., ::-1])
+        # print("composite type:", image.dtype)
+        transformed = noise_t(image=image, mask=segmentation_map)
+        transformed_image = transformed["image"]
+        transformed_mask = transformed["mask"]
+        # print(type(image), image.shape)
+        cv2.imwrite(str(output_image_dir / f"image_{idx:06}.jpg"), transformed_image[..., ::-1])
+        cv2.imwrite(str(output_mask_dir / f"image_{idx:06}.png"), transformed_mask)
+        plt.imshow(transformed_mask)
+        plt.savefig(str(output_mask_dir / "../visualized" / f"image_{idx:06}.jpg"))
 
 
 def main(args):
@@ -112,8 +115,16 @@ def main(args):
     sub_dir = "training"
     output_dir = args.output_base_path / sub_dir
     output_dir.mkdir(exist_ok=True)
+    (output_dir / "images").mkdir(exist_ok=True)
+    (output_dir / "masks").mkdir(exist_ok=True)
+    (output_dir / "visualized").mkdir(exist_ok=True)
     blender_image_path = args.blender_image_base_path / sub_dir
-    generate_and_save_images(output_dir, blender_image_path, background_image_iter=background_image_iter)
+    generate_and_save_images(
+        blender_image_path,
+        output_image_dir=output_dir / "images",
+        output_mask_dir=output_dir / "masks",
+        background_image_iter=background_image_iter,
+    )
 
 
 if __name__ == "__main__":
