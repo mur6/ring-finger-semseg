@@ -14,14 +14,15 @@ noise_t = A.Compose(
     [
         A.OneOf(
             [
-                A.Cutout(num_holes=40, max_h_size=4, max_w_size=4),
-                A.Cutout(num_holes=35, max_h_size=8, max_w_size=8),
-                A.Cutout(num_holes=20, max_h_size=16, max_w_size=16),
+                A.Cutout(num_holes=50, max_h_size=8, max_w_size=8),
+                A.Cutout(num_holes=40, max_h_size=12, max_w_size=12),
+                A.Cutout(num_holes=30, max_h_size=16, max_w_size=16),
             ],
-            p=0.8,
+            p=0.9,
         ),
         A.GaussNoise(),
         A.Blur(blur_limit=3),
+        A.RandomBrightness(limit=0.4)
         # A.OpticalDistortion(),
         # A.GridDistortion(),
     ]
@@ -65,9 +66,13 @@ def iter_background_images(path):
 
 def composite_image(*, fg, bg, segmentation_map):
     image_mask = np.where(segmentation_map != 0, 1, 0)
-    im_c = fg * np.stack([image_mask] * 3, axis=2)
-    im_g = bg * np.stack([1 - image_mask] * 3, axis=2)
-    return im_c + im_g
+    # print(image_mask)
+    # k = np.stack([image_mask] * 3, axis=2)
+    # print("stack.shape:", k.shape)
+    # print(k)
+    im_fg = fg * np.stack([image_mask] * 3, axis=2)
+    im_bg = bg * np.stack([1 - image_mask] * 3, axis=2)
+    return (im_fg + im_bg).astype(np.uint8)
 
 
 def iter_image_and_segmentation_map(root_dir):
@@ -89,25 +94,34 @@ def iter_image_and_segmentation_map(root_dir):
         yield image, segmentation_map
 
 
-def main(args):
-    output_dir = Path("data/outputs/")
-    output_dir.mkdir(exist_ok=True)
-
-    background_image_iter = iter_background_images(args.background_image_path)
-
-    base_data_dir = Path("../blender-for-finger-segmentation/")
-    it = iter_image_and_segmentation_map(base_data_dir / "training")
-
-    for image, segmentation_map in it:
+def generate_and_save_images(output_dir, blender_image_path, *, background_image_iter):
+    it = iter_image_and_segmentation_map(blender_image_path)
+    for idx, (image, segmentation_map) in enumerate(it):
         image = composite_image(fg=image, bg=next(background_image_iter), segmentation_map=segmentation_map)
+        print("composite type:", image.dtype)
         image = noise_t(image=image)["image"]
+        print(type(image), image.shape)
+        # plt.imshow(image)
+        # plt.show()
+        # Image.fromarray(image, "RGB").save(p)
+        cv2.imwrite(str(output_dir / f"image_{idx:06}.jpg"), image[..., ::-1])
+
+
+def main(args):
+    background_image_iter = iter_background_images(args.background_image_path)
+    sub_dir = "training"
+    output_dir = args.output_base_path / sub_dir
+    output_dir.mkdir(exist_ok=True)
+    blender_image_path = args.blender_image_base_path / sub_dir
+    generate_and_save_images(output_dir, blender_image_path, background_image_iter=background_image_iter)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    coco_data_path = "/Users/taichi.muraki/workspace/Python/fiftyone/coco2017/validation/data"
-    # "/content/data"
-    parser.add_argument("--background_image_path", type=Path, default=coco_data_path)
+    # coco_data_path = "/Users/taichi.muraki/workspace/Python/fiftyone/coco2017/validation/data"
+    parser.add_argument("--background_image_path", type=Path, default="/content/data")
+    parser.add_argument("--blender_image_base_path", type=Path, required=True)
+    parser.add_argument("--output_base_path", type=Path, default="data/outputs")
 
     args = parser.parse_args()
     main(args)
