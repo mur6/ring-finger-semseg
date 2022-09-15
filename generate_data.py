@@ -7,6 +7,7 @@ from typing import List
 import albumentations as A
 import cv2
 import numpy as np
+from PIL import Image
 
 noise_t = A.Compose(
     [
@@ -129,15 +130,30 @@ def get_random_background(background_images):
 import matplotlib.pyplot as plt
 
 
+def composite_image(*, fg, bg, segmentation_map):
+    image_mask = np.where(segmentation_map != 0, 1, 0)
+    im_c = fg * np.stack([image_mask] * 3, axis=2)
+    im_g = bg * np.stack([1 - image_mask] * 3, axis=2)
+    return im_c + im_g
+
+
 def main(args):
     start = time.time()
 
     output_dir = Path("data/outputs/")
     background_images = init_background_images(args.background_image_path)
-    b = get_random_background(background_images)
+    bg = get_random_background(background_images)
     # b = background_images[0]
     # mask = encoded_inputs["labels"].numpy()
-    plt.imshow(b)
+    base_data_dir = Path("../blender-for-finger-segmentation/")
+    from dataset import ImageSegmentationDataset
+
+    train_dataset = ImageSegmentationDataset(root_dir=base_data_dir / "training")
+    image, segmentation_map = train_dataset[0]
+
+    im_out = composite_image(fg=image, bg=bg, segmentation_map=segmentation_map)
+
+    plt.imshow(im_out)
     plt.show()
     # kwargs = dict(
     #     , generate_image=args.generate_image
@@ -159,7 +175,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    coco_data_path = "/Users/taichi.muraki/workspace/Python/fiftyone/coco2017/train/data"
+    coco_data_path = "/Users/taichi.muraki/workspace/Python/fiftyone/coco2017/validation/data"
     # "/content/data"
     parser.add_argument("--background_image_path", type=Path, default=coco_data_path)
     # parser.add_argument("--training_data_size", type=int, default=100, help="training data_size")
