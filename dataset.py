@@ -53,9 +53,10 @@ class ImageSegmentationDataset(Dataset):
         #         segmentation_map = Image.open()
 
         if self.transforms is not None:
-            augmented = self.transforms(image=image, mask=segmentation_map)
+            norm_image = torch.from_numpy(image.astype(np.float32)).permute(2, 0, 1)
+            norm_image = self.transforms(norm_image)
             # randomly crop + pad both image and segmentation map to same size
-            encoded_inputs = self.feature_extractor(augmented["image"], augmented["mask"], return_tensors="pt")
+            encoded_inputs = self.feature_extractor(norm_image, segmentation_map, return_tensors="pt")
         else:
             encoded_inputs = self.feature_extractor(image, segmentation_map, return_tensors="pt")
 

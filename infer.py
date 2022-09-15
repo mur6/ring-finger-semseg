@@ -4,6 +4,7 @@ from typing import List
 import albumentations as A
 import cv2
 import numpy as np
+from torchvision import transforms as transforms
 
 base_data_dir = Path("data/outputs")
 # print(base_dir)
@@ -15,6 +16,12 @@ feature_extractor = SegformerFeatureExtractor(align=False, reduce_zero_label=Fal
 
 
 from dataset import ImageSegmentationDataset
+
+transform = transforms.Compose(
+    [
+        transforms.Normalize(mean=[-0.2252, -0.3175, -0.2871], std=[1.0165, 0.9765, 0.9332]),
+    ]
+)
 
 train_dataset = ImageSegmentationDataset(
     root_dir=base_data_dir / "training", feature_extractor=feature_extractor, transforms=None
