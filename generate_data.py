@@ -108,15 +108,15 @@ def generate_and_save_images(blender_image_path, *, output_image_dir, output_mas
         # print(type(image), image.shape)
         cv2.imwrite(str(output_image_dir / f"image_{idx:06}.jpg"), transformed_image[..., ::-1])
         cv2.imwrite(str(output_mask_dir / f"image_{idx:06}.png"), transformed_mask)
-        plt.imshow(transformed_mask)
-        plt.savefig(str(output_mask_dir / "../visualized" / f"image_{idx:06}.jpg"))
+        # plt.imshow(transformed_mask)
+        # plt.savefig(str(output_mask_dir / "../visualized" / f"image_{idx:06}.jpg"))
 
 
 def main(args):
     background_image_iter = iter_background_images(args.background_image_path)
     sub_dir = args.target
     output_dir = args.output_base_path / sub_dir
-    output_dir.mkdir(exist_ok=True)
+    output_dir.mkdir(exist_ok=True, parents=True)
     (output_dir / "images").mkdir(exist_ok=True)
     (output_dir / "masks").mkdir(exist_ok=True)
     (output_dir / "visualized").mkdir(exist_ok=True)
