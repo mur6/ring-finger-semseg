@@ -5,7 +5,7 @@ import albumentations as A
 import cv2
 import numpy as np
 
-base_data_dir = Path("../blender-for-finger-segmentation/")
+base_data_dir = Path("data/outputs")
 # print(base_dir)
 
 from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
