@@ -96,7 +96,9 @@ def iter_image_and_segmentation_map(root_dir):
         yield image, segmentation_map
 
 
-def generate_and_save_images(blender_image_path, *, output_image_dir, output_mask_dir, background_image_iter):
+def generate_and_save_images(
+    blender_image_path, *, output_image_dir, output_mask_dir, background_image_iter, output_visualize_data=False
+):
     it = iter_image_and_segmentation_map(blender_image_path)
     # it = list(it)[:5]
     for idx, (image, segmentation_map) in enumerate(it):
@@ -108,8 +110,9 @@ def generate_and_save_images(blender_image_path, *, output_image_dir, output_mas
         # print(type(image), image.shape)
         cv2.imwrite(str(output_image_dir / f"image_{idx:06}.jpg"), transformed_image[..., ::-1])
         cv2.imwrite(str(output_mask_dir / f"image_{idx:06}.png"), transformed_mask)
-        # plt.imshow(transformed_mask)
-        # plt.savefig(str(output_mask_dir / "../visualized" / f"image_{idx:06}.jpg"))
+        if output_visualize_data:
+            plt.imshow(transformed_mask)
+            plt.savefig(str(output_mask_dir / "../visualized" / f"image_{idx:06}.jpg"))
 
 
 def main(args):
