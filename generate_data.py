@@ -1,14 +1,11 @@
 import argparse
 import random
-import time
 from pathlib import Path
-from typing import List
 
 import albumentations as A
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
 
 noise_t = A.Compose(
     [
