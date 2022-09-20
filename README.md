@@ -10,7 +10,9 @@ $ source .venv/bin/activate.fish
 ## 教師データの生成
 ```
 python generate_data.py \
-  --background_image_path=../coco2017/train/data
+  --background_image_path ../fiftyone/coco2017/validation/data \
+  --blender_image_base_path ../blender-for-finger-segmentation/data2 \
+  --target training
 ```
 
 ## 推論
