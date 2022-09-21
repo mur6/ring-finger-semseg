@@ -7,6 +7,9 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+IMAGE_SIZE = (224, 224)
+
+
 noise_t = A.Compose(
     [
         A.OneOf(
@@ -22,6 +25,7 @@ noise_t = A.Compose(
         A.RandomBrightness(limit=0.4),
         A.RandomScale(0.25),
         A.Rotate(border_mode=cv2.BORDER_CONSTANT),
+        A.Resize(width=IMAGE_SIZE[0], height=IMAGE_SIZE[1])
         # A.OpticalDistortion(),
         # A.GridDistortion(),
     ]
@@ -34,9 +38,6 @@ noise_t = A.Compose(
 #     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #     img = cv2.resize(img, imsize)
 #     return img
-
-
-IMAGE_SIZE = (224, 224)
 
 
 def iter_background_images(path):
