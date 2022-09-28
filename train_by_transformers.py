@@ -204,8 +204,8 @@ for epoch in range(1, 1 + 1):
         optimizer.zero_grad()
 
         outputs = model(pixel_values=pixel_values)
-        # print()
-        # print(outputs.dtype)
+        print("outputs.shape", outputs.shape)
+        print("outputs.dtype", outputs.dtype)
 
         # evaluate
         points = ((points - (224 / 2.0)) / 112.0).float()
@@ -257,12 +257,10 @@ for epoch in range(1, 1 + 1):
         val_loss = 0.0
         with torch.no_grad():
             for idx, batch in enumerate(valid_dataloader):
-                masks = batch[1]
-                masks[masks == 2] = -1
-                masks = masks.to(device)
-                points = batch[2].to(device)
+                pixel_values = batch["pixel_values"].to(device)
+                points = batch["points"].to(device)
                 points = (points - (224 / 2.0)) / 112.0
-                outputs = model(masks=masks)
+                outputs = model(pixel_values=pixel_values)
                 loss = criterion(outputs, points)
                 val_loss += loss.item()
         # with torch.no_grad():
