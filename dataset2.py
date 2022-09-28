@@ -71,30 +71,25 @@ class RingFingerDataset(Dataset):
         image = cv2.imread(str(self.images[idx]))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(str(self.masks[idx]), cv2.IMREAD_GRAYSCALE)
+        segmentation_map = mask
 
         if self.transform is not None:
             aug = self.transform(image=image, mask=mask)
             image = Image.fromarray(aug["image"])
             mask = aug["mask"]
 
-        # if self.transform is None:
-        #    image = Image.fromarray(image)
         aug = albumentations_transform(image=image, mask=mask)
         image = aug["image"]
         mask = aug["mask"]
-        image = to_tensor(image=image)["image"]
-        points = torch.from_numpy(solve_points(mask))
-        mask = torch.from_numpy(mask).long()
 
-        # if self.transforms is not None:
-        #     norm_image = torch.from_numpy(image.astype(np.float32)).permute(2, 0, 1)
-        #     norm_image = self.transforms(norm_image)
-        #     # randomly crop + pad both image and segmentation map to same size
-        #     encoded_inputs = self.feature_extractor(norm_image, segmentation_map, return_tensors="pt")
-        # else:
-        #     encoded_inputs = self.feature_extractor(image, segmentation_map, return_tensors="pt")
+        if self.transform is not None:
+            raise NotImplementedError("transform is not implemented.")
+        else:
+            encoded_inputs = self.feature_extractor(image, segmentation_map, return_tensors="pt")
 
-        # for k, v in encoded_inputs.items():
-        #     encoded_inputs[k].squeeze_()  # remove batch dimension
+        for k, v in encoded_inputs.items():
+            encoded_inputs[k].squeeze_()
 
-        return image, mask, points
+        # print(encoded_inputs)
+        encoded_inputs["points"] = torch.from_numpy(solve_points(mask))
+        return encoded_inputs
