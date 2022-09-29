@@ -95,3 +95,29 @@ class RingFingerDataset(Dataset):
         # print(encoded_inputs)
         encoded_inputs["points"] = torch.from_numpy(solve_points(mask))
         return encoded_inputs
+
+
+if __name__ == "__main__":
+    from transformers import SegformerFeatureExtractor
+
+    # from dataset2 import RingFingerDataset
+    base_data_dir = Path("../blender-for-finger-segmentation/data2/")
+
+    feature_extractor_inference = SegformerFeatureExtractor(do_random_crop=False, do_pad=False)
+
+    train_dataset = RingFingerDataset(
+        base_data_dir / "training",
+        "data/datasets/contour_checked_numbers_training.json",
+        feature_extractor=feature_extractor_inference,
+        transform=None,
+    )
+    valid_dataset = RingFingerDataset(
+        base_data_dir / "validation",
+        "data/datasets/contour_checked_numbers_validation.json",
+        feature_extractor=feature_extractor_inference,
+        transform=None,
+    )
+    t = train_dataset[0]
+    pixel_values = t["pixel_values"]
+    labels = t["labels"]
+    print(pixel_values.shape, labels.shape)
