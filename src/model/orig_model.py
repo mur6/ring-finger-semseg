@@ -58,21 +58,15 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
                 encoder_hidden_state, size=encoder_hidden_states[0].size()[2:], mode="bilinear", align_corners=False
             )
             all_hidden_states += (encoder_hidden_state,)
-        count = len(all_hidden_states)
-        print("after all_hidden_states: length: ", count)
+
         hidden_states = self.linear_fuse(torch.cat(all_hidden_states[::-1], dim=1))
-        print("after linear_fuse: nn.Conv2d: ", hidden_states.shape)
         hidden_states = self.batch_norm(hidden_states)
-        print("after batch_norm: nn.BatchNorm2d: ", hidden_states.shape)
         hidden_states = self.activation(hidden_states)
-        print("after activation: nn.ReLU: ", hidden_states.shape)
-        hidden_states = hidden_states.contiguous().view(batch_size, -1)
-        print("after contiguous.view: ", hidden_states.shape)
         hidden_states = self.dropout(hidden_states)
-        print("after dropout: nn.Dropout: ", hidden_states.shape)
+
         # logits are of shape (batch_size, num_labels, height/4, width/4)
         logits = self.classifier(hidden_states)
-        print("after classifier: nn.Linear: ", logits.shape)
+
         return logits
 
 
@@ -87,7 +81,7 @@ class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
     def __init__(self, config):
         super().__init__(config)
         self.segformer = SegformerModel(config)
-        self.decode_head = SegformerDecodeHead(config)
+        self.decode_head = OrigSegformerDecodeHead(config)
 
         # Initialize weights and apply final processing
         self.post_init()
