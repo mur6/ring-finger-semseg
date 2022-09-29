@@ -5,10 +5,12 @@ import albumentations as A
 import numpy as np
 import torch
 from torch import nn
+from torch.nn import CrossEntropyLoss
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision import transforms as transforms
 from transformers import SegformerDecodeHead, SegformerForSemanticSegmentation
+from transformers.modeling_outputs import SemanticSegmenterOutput
 from transformers.models.segformer.modeling_segformer import SegformerMLP, SegformerModel
 
 
@@ -68,10 +70,6 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
         logits = self.classifier(hidden_states)
 
         return logits
-
-
-id2label = {0: "unlabeled", 1: "hand", 2: "mat"}
-label2id = {v: k for k, v in id2label.items()}
 
 
 class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
@@ -161,6 +159,8 @@ class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
 
 
 def get_model():
+    id2label = {0: "unlabeled", 1: "hand", 2: "mat"}
+    label2id = {v: k for k, v in id2label.items()}
     model = OrigSegformerForSemanticSegmentation.from_pretrained(
         "nvidia/mit-b2",
         ignore_mismatched_sizes=True,
@@ -170,3 +170,8 @@ def get_model():
         reshape_last_stage=True,
     )
     return model
+
+
+if __name__ == "__main__":
+    model = get_model()
+    print(model)
