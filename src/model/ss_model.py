@@ -127,6 +127,6 @@ def get_model():
 
 if __name__ == "__main__":
     model = get_model()
-    out = model(torch.rand(1, 3, 224, 224))
-    print(out.logits.shape)
+    out = model(torch.rand(1, 3, 512, 512))
+    print(out.shape)
     # print(model)

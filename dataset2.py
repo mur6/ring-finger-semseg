@@ -120,4 +120,5 @@ if __name__ == "__main__":
     t = train_dataset[0]
     pixel_values = t["pixel_values"]
     labels = t["labels"]
-    print(pixel_values.shape, labels.shape)
+    points = t["points"]
+    print(pixel_values.shape, labels.shape, points.shape)

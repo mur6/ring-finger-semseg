@@ -39,4 +39,4 @@ logits = outputs.logits
 print(f"outputs: {type(outputs)}")
 print(f"outputs.logis: {logits.shape}")
 
-torch.save(logits, save_file_name)
+# torch.save(logits, save_file_name)
