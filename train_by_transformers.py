@@ -27,7 +27,7 @@ albumentations_transform = A.Compose(
 )
 
 from dataset2 import RingFingerDataset
-from src.model.ss_model import get_model
+from src.model.orig_model import get_model
 
 # base_data_dir = Path("datasets")
 base_data_dir = Path("../blender-for-finger-segmentation/data2/")

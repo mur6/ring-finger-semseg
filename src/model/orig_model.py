@@ -37,7 +37,7 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
         self.dropout = nn.Dropout(config.classifier_dropout_prob)
         self.classifier = nn.Conv2d(config.decoder_hidden_size, config.num_labels, kernel_size=1)
         self.dropout2 = nn.Dropout()
-        self.classifier2 = nn.Linear(768 * 32 * 32, 4)
+        self.classifier2 = nn.Linear(768 * 128 * 128, 4)
         self.config = config
 
     def forward(self, encoder_hidden_states):
@@ -181,6 +181,6 @@ def get_model():
 
 if __name__ == "__main__":
     model = get_model()
-    logits, points = model(torch.rand(1, 3, 128, 128))
+    logits, points = model(torch.rand(1, 3, 512, 512))
     print(logits.shape, points.shape)
     # print(model)
