@@ -166,14 +166,16 @@ class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
 def get_model():
     id2label = {0: "unlabeled", 1: "hand", 2: "mat"}
     label2id = {v: k for k, v in id2label.items()}
-    model = OrigSegformerForSemanticSegmentation.from_pretrained(
-        "nvidia/mit-b2",
-        ignore_mismatched_sizes=True,
-        num_labels=len(id2label),
-        id2label=id2label,
-        label2id=label2id,
-        reshape_last_stage=True,
-    )
+    model_dir = "models/segformer_b2/"
+    model = OrigSegformerForSemanticSegmentation.from_pretrained(model_dir)
+    # model = OrigSegformerForSemanticSegmentation.from_pretrained(
+    #     "nvidia/mit-b2",
+    #     ignore_mismatched_sizes=True,
+    #     num_labels=len(id2label),
+    #     id2label=id2label,
+    #     label2id=label2id,
+    #     reshape_last_stage=True,
+    # )
     return model
 
 
