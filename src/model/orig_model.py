@@ -70,9 +70,6 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
         return logits
 
 
-# feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/mit-b2")
-# model = SegformerForSemanticSegmentation.from_pretrained("nvidia/mit-b2")
-
 id2label = {0: "unlabeled", 1: "hand", 2: "mat"}
 label2id = {v: k for k, v in id2label.items()}
 
