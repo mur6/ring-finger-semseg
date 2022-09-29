@@ -36,7 +36,8 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
 
         self.dropout = nn.Dropout(config.classifier_dropout_prob)
         self.classifier = nn.Conv2d(config.decoder_hidden_size, config.num_labels, kernel_size=1)
-
+        self.dropout2 = nn.Dropout()
+        self.classifier2 = nn.Linear(768 * 32 * 32, 4)
         self.config = config
 
     def forward(self, encoder_hidden_states):
@@ -65,11 +66,14 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
         hidden_states = self.batch_norm(hidden_states)
         hidden_states = self.activation(hidden_states)
         hidden_states = self.dropout(hidden_states)
-
+        print("after dropout: nn.Dropout: ", hidden_states.shape)
         # logits are of shape (batch_size, num_labels, height/4, width/4)
         logits = self.classifier(hidden_states)
-
-        return logits
+        print("after classifier: nn.Linear: ", logits.shape)
+        temp = hidden_states.contiguous().view(batch_size, -1)
+        temp = self.dropout2(temp)
+        points = self.classifier2(temp)
+        return logits, points
 
 
 class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
@@ -129,7 +133,7 @@ class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
 
         encoder_hidden_states = outputs.hidden_states if return_dict else outputs[1]
 
-        logits = self.decode_head(encoder_hidden_states)
+        logits, points = self.decode_head(encoder_hidden_states)
 
         loss = None
         if labels is not None:
@@ -150,12 +154,13 @@ class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
                 output = (logits,) + outputs[2:]
             return ((loss,) + output) if loss is not None else output
 
-        return SemanticSegmenterOutput(
-            loss=loss,
-            logits=logits,
-            hidden_states=outputs.hidden_states if output_hidden_states else None,
-            attentions=outputs.attentions,
-        )
+        # return SemanticSegmenterOutput(
+        #     loss=loss,
+        #     logits=logits,
+        #     hidden_states=outputs.hidden_states if output_hidden_states else None,
+        #     attentions=outputs.attentions,
+        # )
+        return logits, points
 
 
 def get_model():
@@ -174,6 +179,6 @@ def get_model():
 
 if __name__ == "__main__":
     model = get_model()
-    out = model(torch.rand(1, 3, 128, 128))
-    print(out.logits.shape)
+    logits, points = model(torch.rand(1, 3, 128, 128))
+    print(logits.shape, points.shape)
     # print(model)
