@@ -78,13 +78,6 @@ class MySegformerDecodeHead(SegformerDecodeHead):
         return logits
 
 
-# feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/mit-b2")
-# model = SegformerForSemanticSegmentation.from_pretrained("nvidia/mit-b2")
-
-id2label = {0: "unlabeled", 1: "hand", 2: "mat"}
-label2id = {v: k for k, v in id2label.items()}
-
-
 class MySegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
     def __init__(self, config):
         super().__init__(config)
@@ -119,6 +112,8 @@ class MySegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
 
 
 def get_model():
+    id2label = {0: "unlabeled", 1: "points"}
+    label2id = {v: k for k, v in id2label.items()}
     model = MySegformerForSemanticSegmentation.from_pretrained(
         "nvidia/mit-b2",
         ignore_mismatched_sizes=True,
@@ -128,3 +123,10 @@ def get_model():
         reshape_last_stage=True,
     )
     return model
+
+
+if __name__ == "__main__":
+    model = get_model()
+    out = model(torch.rand(1, 3, 224, 224))
+    print(out.logits.shape)
+    # print(model)
