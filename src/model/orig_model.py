@@ -83,7 +83,7 @@ id2label = {0: "unlabeled", 1: "hand", 2: "mat"}
 label2id = {v: k for k, v in id2label.items()}
 
 
-class SegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
+class OrigSegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
     def __init__(self, config):
         super().__init__(config)
         self.segformer = SegformerModel(config)
@@ -92,8 +92,6 @@ class SegformerForSemanticSegmentation(SegformerForSemanticSegmentation):
         # Initialize weights and apply final processing
         self.post_init()
 
-    @add_start_docstrings_to_model_forward(SEGFORMER_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-    @replace_return_docstrings(output_type=SemanticSegmenterOutput, config_class=_CONFIG_FOR_DOC)
     def forward(
         self,
         pixel_values: torch.FloatTensor,
