@@ -20,12 +20,6 @@ from torchvision.transforms import Resize, ToTensor
 from transformers import SegformerDecodeHead, SegformerFeatureExtractor, SegformerForSemanticSegmentation
 from transformers.models.segformer.modeling_segformer import SegformerMLP, SegformerModel
 
-albumentations_transform = A.Compose(
-    [
-        A.Resize(224, 224),
-    ]
-)
-
 from dataset2 import RingFingerDataset
 from src.model.orig_model import get_model
 
