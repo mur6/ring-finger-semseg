@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -17,6 +18,7 @@ def get_images(samples_dir):
         sample_images = sorted(list(samples_dir.glob("*.jpg")))
         for p in sample_images:
             image = Image.open(p)
+            image = image.resize((224, 224))
             yield image
 
     return tuple(_iter_pil_images())
@@ -24,7 +26,15 @@ def get_images(samples_dir):
 
 images = get_images("data/samples")
 
-model_dir = "models/custom_segsem_02/"
+
+def draw_dot(ax, point):
+    print(point)
+    x, y = tuple(point)
+    c = patches.Circle(xy=(x, y), radius=4, color="red")
+    ax.add_patch(c)
+
+
+model_dir = "models/custom_segsem_08/"
 model = OrigSegformerForSemanticSegmentation.from_pretrained(model_dir)
 model.eval()
 
@@ -49,12 +59,24 @@ with torch.no_grad():
     points = points * 112 + 112
     print(points)
 
-    # #, points)
-    # print(masks.shape, points.shape)
-    # fig, ax = plt.subplots(1, 2)
-    # ax[0].imshow(data[0].numpy().transpose(1, 2, 0))
-    # ax[1].imshow(masks)
+# fig, (orig_ax, ax) = plt.subplots(2, 1)
+fig, axes = plt.subplots(2, 1)
+for i, (ax, image) in enumerate(zip(axes, images)):
+    ax.imshow(image)
+    # ax.imshow(masks.numpy().transpose(1, 2, 0))
+    point = points[i]
+    # print(p)
+    draw_dot(ax, point[:2])
+    draw_dot(ax, point[2:])
 
-    # # draw_dot(ax[1], points[:2])
-    # # draw_dot(ax[1], points[2:])
-    # plt.show()
+plt.show()
+
+# #, points)
+# print(masks.shape, points.shape)
+# fig, ax = plt.subplots(1, 2)
+# ax[0].imshow(data[0].numpy().transpose(1, 2, 0))
+# ax[1].imshow(masks)
+
+# # draw_dot(ax[1], points[:2])
+# # draw_dot(ax[1], points[2:])
+# plt.show()
