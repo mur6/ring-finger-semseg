@@ -36,8 +36,11 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
 
         self.dropout = nn.Dropout(config.classifier_dropout_prob)
         self.classifier = nn.Conv2d(config.decoder_hidden_size, config.num_labels, kernel_size=1)
-        self.dropout2 = nn.Dropout()
-        self.classifier2 = nn.Linear(768 * 128 * 128, 4)
+        # self.dropout2 = nn.Dropout()
+        self.fc = nn.Sequential(
+            nn.Dropout(0.5), nn.Linear(768 * 128 * 128, 1024), nn.ReLU(True), nn.Dropout(0.5), nn.Linear(1024, 4)
+        )
+        # self.classifier2 = nn.Linear(768 * 128 * 128, 4)
         self.config = config
 
     def forward(self, encoder_hidden_states):
@@ -71,8 +74,9 @@ class OrigSegformerDecodeHead(SegformerDecodeHead):
         logits = self.classifier(hidden_states)
         # print("after classifier: nn.Linear: ", logits.shape)
         temp = hidden_states.contiguous().view(batch_size, -1)
-        temp = self.dropout2(temp)
-        points = self.classifier2(temp)
+        # temp = self.dropout2(temp)
+        # points = self.classifier2(temp)
+        points = self.fc(temp)
         return logits, points
 
 
