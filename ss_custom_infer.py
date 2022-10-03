@@ -59,8 +59,7 @@ with torch.no_grad():
     points = points * 112 + 112
     print(points)
 
-# fig, (orig_ax, ax) = plt.subplots(2, 1)
-fig, axes = plt.subplots(2, 1)
+fig, axes = plt.subplots(2, 1, figsize=(7, 8))
 for i, (ax, image) in enumerate(zip(axes, images)):
     ax.imshow(image)
     # ax.imshow(masks.numpy().transpose(1, 2, 0))
